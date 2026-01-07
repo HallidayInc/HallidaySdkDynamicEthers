@@ -8,6 +8,10 @@ Get a Dynamic environment ID: https://app.dynamic.xyz/
 
 Get a Halliday API key: https://halliday.xyz/contact
 
+### Setup
+
+This example app implements swaps on Base chain. The Dynamic account must have Base enabled before attempting to run this example. This can be configured in the dashboard using the toggles here: https://app.dynamic.xyz/dashboard/chains-and-networks#evm.
+
 ### Run
 
 Edit the `.env` file by inserting the Dynamic and Halliday keys.

@@ -17,6 +17,7 @@ function App() {
 
     const address = primaryWallet.address;
     const connectedSigner = connectSigner(async () => {
+      // Remember to add Base in the Dynamic dashboard beforehand (see README)
       return wrapSignerWithDynamicOverrides(
         await getSigner(primaryWallet),
         primaryWallet
