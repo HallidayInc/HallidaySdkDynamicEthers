@@ -1,6 +1,7 @@
+import { useEffect } from 'react';
 import { useDynamicContext, useIsLoggedIn } from '@dynamic-labs/sdk-react-core'
 import { isEthereumWallet } from '@dynamic-labs/ethereum'
-import { openHallidayPayments } from '@halliday-sdk/payments'
+import { openHallidayPayments, initializeClient } from '@halliday-sdk/payments'
 import { connectSigner } from '@halliday-sdk/payments/ethers'
 import { getSigner } from '@dynamic-labs/ethers-v6'
 import { wrapSignerWithDynamicOverrides } from './dynamic-ethers-wrappers'
@@ -11,6 +12,14 @@ const HALLIDAY_PUBLIC_API_KEY = import.meta.env.VITE_HALLIDAY_API_KEY
 function App() {
   const { sdkHasLoaded, primaryWallet, setShowAuthFlow, handleLogOut } = useDynamicContext();
   const isLoggedIn = useIsLoggedIn();
+
+  useEffect(() => {
+    initializeClient({
+      apiKey: HALLIDAY_PUBLIC_API_KEY,
+      onReady: () => { console.log('Preloaded and ready'); },
+      onError: (error) => { console.error(error); },
+    });
+  }, []);
 
   const launchHalliday = async () => {
     if (!primaryWallet || !isEthereumWallet(primaryWallet)) return;
