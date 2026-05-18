@@ -6,7 +6,7 @@ Halliday Payments SDK integration example using a Dynamic embedded wallet. This 
 
 Get a Dynamic environment ID: https://app.dynamic.xyz/
 
-Get a Halliday API key: https://halliday.xyz/contact
+Get a free Halliday API key now: https://dashboard.halliday.xyz
 
 ### Setup
 

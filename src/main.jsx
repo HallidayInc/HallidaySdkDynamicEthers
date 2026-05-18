@@ -1,8 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { Buffer } from 'buffer'
-window.Buffer = Buffer
-import { DynamicContextProvider } from '@dynamic-labs/sdk-react-core'
+import { DynamicContextProvider, overrideNetworkRpcUrl } from '@dynamic-labs/sdk-react-core'
 import { EthereumWalletConnectors } from '@dynamic-labs/ethereum'
 import './index.css'
 import App from './App.jsx'
@@ -25,6 +23,12 @@ createRoot(document.getElementById('root')).render(
       settings={{
         environmentId: DYNAMIC_ENVIRONMENT_ID,
         walletConnectors: [EthereumWalletConnectors],
+        overrides: {
+          evmNetworks: (networks) => overrideNetworkRpcUrl(networks, {
+            '1': ['https://cloudflare-eth.com'],
+            '8453': ['https://mainnet.base.org'],
+          }),
+        },
       }}
     >
       <App />
