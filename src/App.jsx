@@ -1,66 +1,60 @@
-import { useEffect } from 'react'
 import { useDynamicContext, useIsLoggedIn } from '@dynamic-labs/sdk-react-core'
 import { isEthereumWallet } from '@dynamic-labs/ethereum'
-import { openHallidayPayments, initializeClient } from '@halliday-sdk/payments'
+import {
+  openHallidayPayments,
+  openWithdraw,
+  openActivity,
+  initializeClient,
+} from '@halliday-sdk/payments'
 import { connectSigner } from '@halliday-sdk/payments/ethers'
 import { getSigner } from '@dynamic-labs/ethers-v6'
-import './App.css'
 
 const HALLIDAY_PUBLIC_API_KEY = import.meta.env.VITE_HALLIDAY_API_KEY
 const hallidayOutputs = [
   'base:0x',
-  'base:0x833589fcd6edb6e08f4c7c32d4f71b54bda02913'
-];
+  'base:0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+]
+
+initializeClient({
+  apiKey: HALLIDAY_PUBLIC_API_KEY,
+  outputs: hallidayOutputs,
+  onReady: () => { console.log('Preloaded and ready') },
+  onError: (error) => { console.error(error) },
+})
 
 function App() {
-  const { sdkHasLoaded, primaryWallet, setShowAuthFlow, handleLogOut } = useDynamicContext();
-  const isLoggedIn = useIsLoggedIn();
+  const { sdkHasLoaded, primaryWallet, setShowAuthFlow, handleLogOut } = useDynamicContext()
+  const isLoggedIn = useIsLoggedIn()
 
-  useEffect(() => {
-    initializeClient({
-      apiKey: HALLIDAY_PUBLIC_API_KEY,
-      outputs: hallidayOutputs,
-      onReady: () => { console.log('Preloaded and ready'); },
-      onError: (error) => { console.error(error); },
-    });
-  }, []);
+  const enabled = isLoggedIn && !!primaryWallet && isEthereumWallet(primaryWallet)
 
-  const launchHalliday = async () => {
-    if (!primaryWallet || !isEthereumWallet(primaryWallet)) return;
+  const userWallet = enabled
+    ? connectSigner(async () => {
+        await primaryWallet.connector.switchNetwork({ networkChainId: 8453 })
+        return await getSigner(primaryWallet)
+      })
+    : null
 
-    const connectedSigner = connectSigner(async () => {
-      // Switch to Base before getting the signer so it's on the right chain
-      await primaryWallet.connector.switchNetwork({ networkChainId: 8453 });
-      return await getSigner(primaryWallet);
-    });
-
-    openHallidayPayments({
-      apiKey: HALLIDAY_PUBLIC_API_KEY,
-      outputs: hallidayOutputs,
-      funder: connectedSigner,
-      userWallet: connectedSigner,
-    });
-  };
-
-  if (!sdkHasLoaded) {
-    return <div>Loading...</div>
-  }
-
-  if (!isLoggedIn) {
-    return (
-      <button onClick={() => setShowAuthFlow(true)}>
-        Sign in
-      </button>
-    )
-  }
+  if (!sdkHasLoaded) return <div>Loading...</div>
 
   return (
-    <div>
-      <button onClick={handleLogOut}>Log out</button>
-      <div>Wallet: {primaryWallet?.address}</div>
-      <button onClick={launchHalliday}>Open Halliday</button>
+    <div className="halliday-container">
+      <h1>Halliday SDK Dynamic Ethers Example</h1>
+      <button onClick={isLoggedIn ? handleLogOut : () => setShowAuthFlow(true)}>
+        {isLoggedIn ? 'Log out' : 'Connect'}
+      </button>
+      <button disabled={!enabled} onClick={() => openHallidayPayments({ userWallet })}>
+        Deposit with Halliday
+      </button>
+      <button
+        disabled={!enabled}
+        onClick={() => openWithdraw({ withdrawInputs: hallidayOutputs, withdrawFunder: userWallet })}
+      >
+        Withdraw
+      </button>
+      <button disabled={!enabled} onClick={openActivity}>Activity</button>
     </div>
-  );
+  )
 }
 
 export default App
