@@ -35,6 +35,9 @@ function App() {
       })
     : null
 
+  // Note openActivity cannot be properly called until a userWallet, funder or 
+  // owner is provided to initializeClient or openHallidayPayments
+
   if (!sdkHasLoaded) return <div>Loading...</div>
 
   return (
